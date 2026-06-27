@@ -8,6 +8,8 @@ const FileMonacoEditor = lazy(() =>
 );
 
 export function FileEditor({
+  organizationId,
+  canvasId,
   path,
   content,
   deleted,
@@ -17,6 +19,8 @@ export function FileEditor({
   disabled,
   onChange,
 }: {
+  organizationId?: string;
+  canvasId?: string;
   path: string | null;
   content: string;
   deleted: boolean;
@@ -54,7 +58,12 @@ export function FileEditor({
   if (disabled && isMarkdown) {
     return (
       <div className="min-h-0 flex-1 overflow-auto bg-white p-6">
-        <MarkdownContent content={content} data-testid="file-markdown-preview" />
+        <MarkdownContent
+          content={content}
+          data-testid="file-markdown-preview"
+          organizationId={organizationId}
+          canvasId={canvasId}
+        />
       </div>
     );
   }

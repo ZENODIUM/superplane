@@ -13,6 +13,7 @@ import { useCatalog, useRepositoryPathLists, useRepositorySelectedFileQuery } fr
 import type { AppFile } from "./types";
 
 type UseEditorOptions = {
+  organizationId?: string;
   canvasId?: string;
   versionId?: string;
   isEditing: boolean;
@@ -27,6 +28,7 @@ type UseEditorOptions = {
 };
 
 export function useEditor({
+  organizationId,
   canvasId,
   versionId,
   isEditing,
@@ -148,21 +150,25 @@ export function useEditor({
     enabled: isDiffOpen,
   });
 
-  return buildFilesEditorResult({
-    catalog,
-    pathLists,
-    tabs,
-    pending,
-    pendingChanges,
-    selection,
-    loadedContentByPath,
-    committedContentByPath,
-    stagedDiffPaths,
-    stagedFileDiffs,
-    canManageRepositoryFiles,
-    leftOffset,
-    isDiffOpen,
-    setIsDiffOpen,
-    headerActionsHost,
-  });
+  return {
+    organizationId,
+    canvasId,
+    ...buildFilesEditorResult({
+      catalog,
+      pathLists,
+      tabs,
+      pending,
+      pendingChanges,
+      selection,
+      loadedContentByPath,
+      committedContentByPath,
+      stagedDiffPaths,
+      stagedFileDiffs,
+      canManageRepositoryFiles,
+      leftOffset,
+      isDiffOpen,
+      setIsDiffOpen,
+      headerActionsHost,
+    }),
+  };
 }

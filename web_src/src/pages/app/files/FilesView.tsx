@@ -12,6 +12,7 @@ import type { AppFile } from "./types";
 const DiffDialog = lazy(() => import("./DiffDialog").then((module) => ({ default: module.DiffDialog })));
 
 export function FilesView({
+  organizationId,
   canvasId,
   versionId,
   isEditing,
@@ -24,6 +25,7 @@ export function FilesView({
   onLocalFilesStagingChange,
   onFlushRepositoryFileStagingReady,
 }: {
+  organizationId?: string;
   canvasId?: string;
   versionId?: string;
   isEditing: boolean;
@@ -37,6 +39,7 @@ export function FilesView({
   onFlushRepositoryFileStagingReady?: (flush: (() => Promise<void>) | null) => void;
 }) {
   const editor = useEditor({
+    organizationId,
     canvasId,
     versionId,
     isEditing,
@@ -93,6 +96,8 @@ export function FilesView({
         />
 
         <FileEditor
+          organizationId={organizationId}
+          canvasId={canvasId}
           path={editor.selectedPath}
           content={editor.selectedContent}
           deleted={editor.selectedIsDeleted}
