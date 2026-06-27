@@ -6,6 +6,7 @@ export type { AppFile } from "./types";
 interface FilesOverlayLayerProps {
   isFilesMode: boolean;
   isEditing?: boolean;
+  organizationId?: string;
   canvasId?: string;
   versionId?: string;
   canWrite?: boolean;
@@ -21,6 +22,7 @@ interface FilesOverlayLayerProps {
 export function FilesOverlayLayer({
   isFilesMode,
   isEditing = false,
+  organizationId,
   canvasId,
   versionId,
   canWrite = false,
@@ -36,6 +38,7 @@ export function FilesOverlayLayer({
 
   return (
     <FilesView
+      organizationId={organizationId}
       canvasId={canvasId}
       versionId={versionId}
       isEditing={isEditing}

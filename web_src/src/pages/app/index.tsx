@@ -4414,6 +4414,7 @@ export function AppPage() {
           }}
           files={{
             isEditing,
+            organizationId: organizationId || undefined,
             canvasId: canvasId || undefined,
             versionId: activeCanvasVersionId || undefined,
             canWrite: canActOnCanvas,

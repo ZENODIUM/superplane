@@ -1,10 +1,13 @@
-import ReactMarkdown from "react-markdown";
+import { type ComponentProps, type ReactNode } from "react";
+import ReactMarkdown, { defaultUrlTransform } from "react-markdown";
 import rehypeRaw from "rehype-raw";
 import rehypeSanitize, { defaultSchema } from "rehype-sanitize";
 import remarkBreaks from "remark-breaks";
 import remarkGfm from "remark-gfm";
 
 import { cn } from "@/lib/utils";
+import { MermaidWidget } from "@/components/AgentSidebar/widgets/MermaidWidget";
+import { NodeChipFromLink } from "@/components/AgentSidebar/widgets/NodeChip";
 
 /**
  * Tailwind class string shared by every full-document markdown renderer in the
@@ -53,6 +56,8 @@ interface MarkdownContentProps {
   content: string;
   className?: string;
   "data-testid"?: string;
+  canvasId?: string;
+  organizationId?: string;
 }
 
 /**
@@ -64,8 +69,20 @@ interface MarkdownContentProps {
  * Only line endings are normalized; leading/trailing whitespace is preserved
  * so file viewers render exactly what's on disk (e.g. an indented code block
  * at the very start of a file stays an indented code block).
+ * 
+ * Supports:
+ * - Mermaid diagrams (```mermaid code blocks)
+ * - Node mention chips (node:nodeId links)
+ * - Syntax-highlighted code blocks
+ * - All standard markdown features (tables, images, links, etc.)
  */
-export function MarkdownContent({ content, className, "data-testid": dataTestId }: MarkdownContentProps) {
+export function MarkdownContent({ 
+  content, 
+  className, 
+  "data-testid": dataTestId,
+  canvasId,
+  organizationId,
+}: MarkdownContentProps) {
   const normalized = content.replace(/\r\n/g, "\n");
   if (!normalized.trim()) return null;
   return (
@@ -73,9 +90,73 @@ export function MarkdownContent({ content, className, "data-testid": dataTestId 
       <ReactMarkdown
         remarkPlugins={[remarkGfm, remarkBreaks]}
         rehypePlugins={[rehypeRaw, [rehypeSanitize, MARKDOWN_SANITIZE_SCHEMA]]}
+        urlTransform={(url) => (isSpecialLink(url) ? url : defaultUrlTransform(url))}
+        components={{
+          code: ({ inline, className, children, ...props }) => {
+            const match = /language-(\w+)/.exec(className || "");
+            const language = match?.[1];
+            const code = String(children).replace(/\n$/, "");
+            
+            // Render Mermaid diagrams
+            if (!inline && language === "mermaid") {
+              return <MermaidWidget content={code} />;
+            }
+            
+            // Render inline code
+            if (inline) {
+              return <code className={className} {...props}>{children}</code>;
+            }
+            
+            // Render code blocks with language class for potential syntax highlighting
+            return (
+              <pre>
+                <code className={className} {...props}>
+                  {children}
+                </code>
+              </pre>
+            );
+          },
+          a: ({ children, href }) => (
+            <MarkdownLink href={href} canvasId={canvasId} organizationId={organizationId}>
+              {children}
+            </MarkdownLink>
+          ),
+        }}
       >
         {normalized}
       </ReactMarkdown>
     </div>
   );
+}
+
+function MarkdownLink({
+  href,
+  children,
+  canvasId,
+  organizationId,
+}: ComponentProps<"a"> & { canvasId?: string; organizationId?: string }) {
+  // Render node mention chips
+  const nodeMatch = href?.match(/^node:(.+)$/);
+  if (nodeMatch && canvasId && organizationId) {
+    const label = typeof children === "string" ? children : undefined;
+    return (
+      <NodeChipFromLink
+        nodeId={nodeMatch[1]}
+        rawLabel={label}
+        canvasId={canvasId}
+        organizationId={organizationId}
+      />
+    );
+  }
+
+  // Regular links
+  return (
+    <a href={href} target="_blank" rel="noopener noreferrer">
+      {children}
+    </a>
+  );
+}
+
+function isSpecialLink(url: string): boolean {
+  return url.startsWith("node:");
 }
