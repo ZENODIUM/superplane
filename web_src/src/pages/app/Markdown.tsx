@@ -1,4 +1,4 @@
-import { type ComponentProps, type ReactNode } from "react";
+import { type ComponentProps } from "react";
 import ReactMarkdown, { defaultUrlTransform } from "react-markdown";
 import rehypeRaw from "rehype-raw";
 import rehypeSanitize, { defaultSchema } from "rehype-sanitize";
@@ -92,29 +92,29 @@ export function MarkdownContent({
         rehypePlugins={[rehypeRaw, [rehypeSanitize, MARKDOWN_SANITIZE_SCHEMA]]}
         urlTransform={(url) => (isSpecialLink(url) ? url : defaultUrlTransform(url))}
         components={{
-          code: ({ inline, className, children, ...props }) => {
+          code: ({ className, children, ...props }) => {
             const match = /language-(\w+)/.exec(className || "");
             const language = match?.[1];
             const code = String(children).replace(/\n$/, "");
             
             // Render Mermaid diagrams
-            if (!inline && language === "mermaid") {
+            if (language === "mermaid") {
               return <MermaidWidget content={code} />;
             }
             
-            // Render inline code
-            if (inline) {
-              return <code className={className} {...props}>{children}</code>;
+            // Render code blocks with language class
+            if (match) {
+              return (
+                <pre>
+                  <code className={className} {...props}>
+                    {children}
+                  </code>
+                </pre>
+              );
             }
             
-            // Render code blocks with language class for potential syntax highlighting
-            return (
-              <pre>
-                <code className={className} {...props}>
-                  {children}
-                </code>
-              </pre>
-            );
+            // Render inline code
+            return <code className={className} {...props}>{children}</code>;
           },
           a: ({ children, href }) => (
             <MarkdownLink href={href} canvasId={canvasId} organizationId={organizationId}>

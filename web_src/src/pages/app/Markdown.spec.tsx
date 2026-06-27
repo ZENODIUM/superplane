@@ -4,7 +4,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { describe, expect, it, vi } from "vitest";
 
 import { canvasKeys } from "@/hooks/useCanvasData";
-import { MarkdownContent } from "../Markdown";
+import { MarkdownContent } from "./Markdown";
 
 // Mock mermaid module
 vi.mock("mermaid", () => ({
