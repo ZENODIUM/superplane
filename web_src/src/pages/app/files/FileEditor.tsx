@@ -58,8 +58,8 @@ export function FileEditor({
   if (disabled && isMarkdown) {
     return (
       <div className="min-h-0 flex-1 overflow-auto bg-white p-6">
-        <MarkdownContent 
-          content={content} 
+        <MarkdownContent
+          content={content}
           data-testid="file-markdown-preview"
           organizationId={organizationId}
           canvasId={canvasId}
